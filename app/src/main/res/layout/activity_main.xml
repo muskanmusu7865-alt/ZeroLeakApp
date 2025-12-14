@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="top|center_horizontal"
+    android:paddingTop="40dp"
+    android:background="#E6F6FF">
+
+    <!-- App Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ZeroLeak App"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#1E3A8A"
+        android:layout_marginBottom="50dp" />
+
+    <!-- Fraud & Spam Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="40dp">
+
+        <Button
+            android:id="@+id/btnFraudCall"
+            android:layout_width="150dp"
+            android:layout_height="70dp"
+            android:text="FRAUD CALL"
+            android:textStyle="bold"
+            android:textColor="#1E3A8A"
+            android:background="@drawable/rounded_button"
+            android:layout_marginEnd="20dp" />
+
+        <Button
+            android:id="@+id/btnSpamMessage"
+            android:layout_width="150dp"
+            android:layout_height="70dp"
+            android:text="SPAM MESSAGE"
+            android:textStyle="bold"
+            android:textColor="#1E3A8A"
+            android:background="@drawable/rounded_button" />
+    </LinearLayout>
+
+    <!-- Data Leak Button -->
+    <Button
+        android:id="@+id/btnDataLeak"
+        android:layout_width="320dp"
+        android:layout_height="75dp"
+        android:text="DATA LEAK"
+        android:textStyle="bold"
+        android:textColor="#1E3A8A"
+        android:background="@drawable/rounded_button" />
+
+</LinearLayout>
