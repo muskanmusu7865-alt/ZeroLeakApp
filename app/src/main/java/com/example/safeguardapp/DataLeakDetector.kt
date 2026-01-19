@@ -1,89 +1,67 @@
 package com.example.safeguardapp
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.media.MediaPlayer
-import android.os.Build
-import android.util.Log
+import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 
 class DataLeakDetector(private val context: Context) {
 
-    fun startMonitoring() {
-        Log.d("DataLeakDetector", "Monitoring started...")
+    fun scanInstalledApps() {
 
-        // Simulated leak detection (replace with real logic later)
-        val leakDetected = true
+        val pm = context.packageManager
+        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
-        if (leakDetected) {
-            alertUser("Sensitive data leak suspected!")
-        }
-    }
+        var detected = false
 
-    private fun alertUser(message: String) {
-        // 🔊 Play buzzer sound
-        try {
-            val mediaPlayer = MediaPlayer.create(context, R.raw.buzzer)
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            Log.e("DataLeakDetector", "Buzzer failed: ${e.message}")
-        }
+        for (app in apps) {
 
-        // 🪧 Show Toast
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            val pkgName = app.packageName
 
-        // 🔔 Send Notification
-        showNotification(message)
+            val permissions = pm.getPackageInfo(
+                pkgName,
+                PackageManager.GET_PERMISSIONS
+            ).requestedPermissions ?: continue
 
-        // ⚠️ Show Popup Alert (if context is activity)
-        if (context is AppCompatActivity) {
-            context.runOnUiThread {
-                AlertDialog.Builder(context)
-                    .setTitle("⚠️ Data Leak Warning")
-                    .setMessage(message)
-                    .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                    .show()
+            // list of sensitive permissions
+            val riskyPerms = mutableListOf<String>()
+
+            permissions.forEach { perm ->
+                if (perm.contains("READ_SMS")) riskyPerms.add("READ_SMS")
+                if (perm.contains("READ_CONTACTS")) riskyPerms.add("READ_CONTACTS")
+                if (perm.contains("RECORD_AUDIO")) riskyPerms.add("RECORD_AUDIO")
+            }
+
+            if (riskyPerms.isNotEmpty()) {
+
+                detected = true
+
+                // 🔔 BUZZER
+                BuzzerHelper.play(context)
+
+                // SAVE HISTORY (Option-D pattern)
+                AlertHistoryManager.save(
+                    context,
+                    type = "DATA",
+                    number = pkgName,
+                    message = null,
+                    detail = "Risky permissions: ${riskyPerms.joinToString(", ")}"
+                )
+
+                // TOAST ALERT
+                Toast.makeText(
+                    context,
+                    "⚠️ Risky app detected:\n$pkgName\nPermissions: ${riskyPerms.joinToString(", ")}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
-    }
 
-    private fun showNotification(message: String) {
-        val channelId = "data_leak_channel"
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Create channel for Android O+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Data Leak Alerts",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
+        if (!detected) {
+            Toast.makeText(
+                context,
+                "✅ No risky apps detected",
+                Toast.LENGTH_SHORT
+            ).show()
         }
-
-        // Notification intent
-        val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Build notification
-        val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.stat_notify_error)
-            .setContentTitle("⚠️ Data Leak Detected")
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-
-        notificationManager.notify(1001, builder.build())
     }
 }

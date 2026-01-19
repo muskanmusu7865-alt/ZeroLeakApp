@@ -1,59 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="top|center_horizontal"
-    android:paddingTop="40dp"
-    android:background="#E6F6FF">
+    android:background="@color/white">
 
-    <!-- App Title -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ZeroLeak App"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="#1E3A8A"
-        android:layout_marginBottom="50dp" />
-
-    <!-- Fraud & Spam Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="40dp">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <Button
-            android:id="@+id/btnFraudCall"
-            android:layout_width="150dp"
-            android:layout_height="70dp"
-            android:text="FRAUD CALL"
+        <!-- TITLE -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ZeroLeak"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#1E3A8A"
-            android:background="@drawable/rounded_button"
-            android:layout_marginEnd="20dp" />
+            android:textColor="@color/red_primary"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"/>
 
-        <Button
-            android:id="@+id/btnSpamMessage"
-            android:layout_width="150dp"
-            android:layout_height="70dp"
-            android:text="SPAM MESSAGE"
-            android:textStyle="bold"
-            android:textColor="#1E3A8A"
-            android:background="@drawable/rounded_button" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Privacy Our Priority"
+            android:textColor="@color/red_primary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="30dp"/>
+
+        <!-- ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- FRAUD CALL -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFraudCall"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_weight="1"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/red_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_call"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fraud Call"
+                        android:textStyle="bold"
+                        android:textColor="@color/red_primary"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SPAM MESSAGE -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSpamMessage"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_weight="1"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/red_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_message"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Spam Message"
+                        android:textStyle="bold"
+                        android:textColor="@color/red_primary"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- DATA LEAK -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDataLeak"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="@color/red_light">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_lock"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Data Leak Monitoring"
+                    android:textStyle="bold"
+                    android:textColor="@color/red_primary"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
-
-    <!-- Data Leak Button -->
-    <Button
-        android:id="@+id/btnDataLeak"
-        android:layout_width="320dp"
-        android:layout_height="75dp"
-        android:text="DATA LEAK"
-        android:textStyle="bold"
-        android:textColor="#1E3A8A"
-        android:background="@drawable/rounded_button" />
-
-</LinearLayout>
+</ScrollView>

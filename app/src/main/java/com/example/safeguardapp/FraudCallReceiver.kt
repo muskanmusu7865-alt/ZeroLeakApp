@@ -1,60 +1,88 @@
 package com.example.safeguardapp
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
+import android.content.pm.PackageManager
+import android.provider.ContactsContract
+import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
-import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 
 class FraudCallReceiver : BroadcastReceiver() {
 
-    private val fraudNumbers = listOf(
-        "+911234567890",
-        "+919876543210",
-        "140"
-    )
-
     override fun onReceive(context: Context, intent: Intent) {
 
-        if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
+        if (intent.action != TelephonyManager.ACTION_PHONE_STATE_CHANGED) return
 
-            val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
-            val incomingNumber =
-                intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+        // Permissions required
+        val phonePerm = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.READ_PHONE_STATE
+        ) == PackageManager.PERMISSION_GRANTED
 
-            if (state == TelephonyManager.EXTRA_STATE_RINGING && incomingNumber != null) {
+        val contactsPerm = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.READ_CONTACTS
+        ) == PackageManager.PERMISSION_GRANTED
 
-                if (fraudNumbers.any { incomingNumber.contains(it) }) {
+        if (!phonePerm || !contactsPerm) return
 
-                    // 🔊 Play buzzer
-                    val mp = MediaPlayer.create(context, R.raw.buzzer)
-                    mp.start()
+        val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
+        if (state != TelephonyManager.EXTRA_STATE_RINGING) return
 
-                    // 🔔 Notification
-                    val notification = NotificationCompat.Builder(
-                        context,
-                        "fraud_alert_channel"
-                    )
-                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                        .setContentTitle("Fraud Call Alert")
-                        .setContentText("Fraud call from $incomingNumber")
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .build()
+        val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
 
-                    NotificationManagerCompat.from(context)
-                        .notify(101, notification)
+        // VoIP / WhatsApp ignore
+        val telecom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+        if (!telecom.isInCall) return
 
-                    // 📢 Toast (safe)
-                    Toast.makeText(
-                        context,
-                        "Fraud Call Detected",
-                        Toast.LENGTH_LONG
-                    ).show()
+        // Unknown vs saved
+        val isSaved = isContactSaved(context, incomingNumber)
+
+        if (!isSaved) {
+            // Only unknown → buzzer
+            BuzzerHelper.play(context)
+
+            // Save history (Option-D style)
+            AlertHistoryManager.save(
+                context,
+                type = "CALL",
+                number = incomingNumber ?: "Unknown",
+                message = null,
+                detail = "Unknown SIM caller"
+            )
+        }
+    }
+
+    private fun isContactSaved(context: Context, number: String?): Boolean {
+        if (number.isNullOrBlank()) return false
+
+        val normalizedIncoming = normalize(number)
+
+        val cursor = context.contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
+            null, null, null
+        )
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val savedNum = normalize(it.getString(
+                    it.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                ))
+                if (savedNum.endsWith(normalizedIncoming)) {
+                    return true
                 }
             }
         }
+        return false
     }
+
+    private fun normalize(num: String): String =
+        num.replace("+91", "")
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("(", "")
+            .replace(")", "")
+            .trim()
 }
