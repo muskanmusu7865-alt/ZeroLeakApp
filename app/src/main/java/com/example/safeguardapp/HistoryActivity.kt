@@ -5,31 +5,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
 class HistoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
 
-        val filterType = intent.getStringExtra("TYPE") // "SMS" / "CALL" / "DATA"
+        val type = intent.getStringExtra("TYPE") // CALL / SMS / DATA
 
-        // Load all saved history
         val all = AlertHistoryManager.load(this)
+        val filtered = if (type == null) all else all.filter { it.type == type }
 
-        // Apply filter if required
-        val filtered = when (filterType) {
-            "SMS" -> all.filter { it.type == "SMS" }
-            "CALL" -> all.filter { it.type == "CALL" }
-            "DATA" -> all.filter { it.type == "DATA" }
-            else -> all // Show everything if no filter
-        }
-
-        // Latest entry first (descending time)
-        val sorted = filtered.sortedByDescending { it.timestamp }
-
-        val recycler = findViewById<RecyclerView>(R.id.recyclerHistory)
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = HistoryAdapter(sorted)
+        val rv = findViewById<RecyclerView>(R.id.recyclerHistory)
+        rv.layoutManager = LinearLayoutManager(this)
+        rv.adapter = HistoryAdapter(filtered)
     }
 }

@@ -3,7 +3,7 @@ package com.example.safeguardapp
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.card.MaterialCardView
+import androidx.cardview.widget.CardView
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,20 +11,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val cardFraudCall = findViewById<MaterialCardView>(R.id.cardFraudCall)
-        val cardSpamMessage = findViewById<MaterialCardView>(R.id.cardSpamMessage)
-        val cardDataLeak = findViewById<MaterialCardView>(R.id.cardDataLeak)
+        // 📩 Spam SMS Card
+        findViewById<CardView>(R.id.cardSpamMessage).setOnClickListener {
+            openHistory("SMS")
+        }
 
-        cardFraudCall.setOnClickListener {
+        // 📞 Fraud Call Card
+        findViewById<CardView>(R.id.cardFraudCall).setOnClickListener {
             openHistory("CALL")
         }
 
-        cardSpamMessage.setOnClickListener {
-            openHistory("MESSAGE")
-        }
-
-        cardDataLeak.setOnClickListener {
-            openHistory("DATA")
+        // 🔐 Data Leak Card
+        findViewById<CardView>(R.id.cardDataLeak).setOnClickListener {
+            val detector = DataLeakDetector(this)
+            detector.scanInstalledApps()
         }
     }
 

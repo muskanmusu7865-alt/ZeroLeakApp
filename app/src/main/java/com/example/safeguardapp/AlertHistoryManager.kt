@@ -1,53 +1,29 @@
 package com.example.safeguardapp
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 object AlertHistoryManager {
 
     private const val PREF = "alert_history"
     private const val KEY = "items"
 
-    data class AlertItem(
-        val type: String,        // SMS / CALL / DATA
-        val number: String?,     // phone/app/package
-        val message: String?,    // full SMS only
-        val detail: String?,     // OTP / Link / Unknown caller / Risk perms
-        val timestamp: Long      // sort by time
-    )
+    fun save(context: Context, type: String, number: String, detail: String) {
+        val prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+        val old = prefs.getString(KEY, "") ?: ""
 
-    fun save(
-        context: Context,
-        type: String,
-        number: String?,
-        message: String? = null,
-        detail: String? = null
-    ) {
-        val list = load(context).toMutableList()
-
-        list.add(
-            AlertItem(
-                type = type,
-                number = number,
-                message = message,
-                detail = detail,
-                timestamp = System.currentTimeMillis()
-            )
-        )
-
-        val json = Gson().toJson(list)
-        prefs(context).edit().putString(KEY, json).apply()
+        val newEntry = "$type|$number|$detail|${System.currentTimeMillis()}"
+        prefs.edit().putString(KEY, "$newEntry\n$old").apply()
     }
 
     fun load(context: Context): List<AlertItem> {
-        val json = prefs(context).getString(KEY, null) ?: return emptyList()
+        val prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+        val raw = prefs.getString(KEY, "") ?: ""
 
-        val type = object : TypeToken<List<AlertItem>>() {}.type
-        return Gson().fromJson(json, type)
+        return raw.lines().mapNotNull {
+            val p = it.split("|")
+            if (p.size == 4)
+                AlertItem(p[0], p[1], p[2], p[3].toLong())
+            else null
+        }
     }
-
-    private fun prefs(context: Context): SharedPreferences =
-        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
 }
